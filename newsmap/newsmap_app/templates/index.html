@@ -2,24 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hello</title>
+    <title>NewsMap</title>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 16px;
+            border-radius: 4px;
+        }
+
+        .li {
+            min-width:100px;
+        }
+
+        #news_list {
+            height:400px;
+            overflow-y:scroll;
+        }
+    </style>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script>
+    <script type="text/javascript" src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" ></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <style>
-        #map {
-        height: 500px;
-        width: 100%;
-       }
-    </style>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous" ></script>
+
+
+
 </head>
 <body>
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-inverse">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -42,8 +63,28 @@
             </div>
         </div>
     </nav>
-    <div id="map"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-7 col-xs-12 col-lg-7">
+                <div id="map"></div>
+            </div>
+            <div class="col-sm-6 col-md-5 col-xs-12 col-lg-5">
+                <!--<div class="panel panel-default">-->
+                    <!--<div class="panel-body">News</div>-->
+                <!--</div>-->
+                <ul id="news_list" class="list-group">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
     <script>
+        marker = undefined
+        marker2 = undefined
+        markers = []
+        map = undefined
         function initMap() {
             var bounds = new google.maps.LatLngBounds(); //for display bounds
 
@@ -53,13 +94,15 @@
             bounds.extend(vizag);
             bounds.extend(delhi);
 
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 5
             });
-            var marker = new google.maps.Marker({
+            marker = new google.maps.Marker({
                 position: delhi,
-                map: map
+                map: map,
+                title: 'Delhi'
             });
+            markers.push(marker)
 
             var infowindow = new google.maps.InfoWindow({
                 content: "<p>This is News from <b>Delhi!</b></p>"
@@ -67,12 +110,15 @@
 
             marker.addListener('click', function() {
                 infowindow.open(map, marker);
+
             });
 
-            var marker2 = new google.maps.Marker({
+            marker2 = new google.maps.Marker({
                 position: vizag,
-                map: map
+                map: map,
+                title: 'Chennai'
             });
+            markers.push(marker2)
 
             var infowindow2 = new google.maps.InfoWindow({
                 content: "<p>This is News from <b>Vizag!</b></p>"
@@ -81,7 +127,9 @@
             marker2.addListener('click', function() {
                 infowindow2.open(map, marker2);
             });
-
+            console.log(marker)
+            google.maps.event.addListener(map,'zoom_changed',updateNewsItems);
+            google.maps.event.addListener(map,'dragend',updateNewsItems);
             map.fitBounds(bounds);
         }
     </script>
@@ -89,4 +137,33 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q&callback=initMap">
     </script>
 </body>
+    <script>
+        function updateNewsItems(){
+            postData = {cities: new Array()}
+            $('#news_list').fadeIn(500, function(){
+                $(this).empty()
+                for(var i = markers.length, bounds = map.getBounds(); i--;) {
+                    if( bounds.contains(markers[i].getPosition()) ){
+                        postData['cities'].push(markers[i].title)
+                    }
+                }
+                $.post('api/news/', postData, function(data){
+                    data = JSON.parse(data)['items']
+                    $.tmpl(newsItemTemplate, data).appendTo('#news_list');
+                    $('img').removeAttr('hspace');
+                    $('img').removeAttr('style');
+                }, 'json');
+            });
+
+        }
+        $(document).ready(function(){
+            newsItemTemplate = undefined
+            $.get('newsitems.html', function(template){
+                newsItemTemplate = template
+                $('#news_list').hide();
+            });
+        });
+
+    </script>
+
 </html>

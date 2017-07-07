@@ -3,4 +3,18 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-# Create your models here.
+
+class City(models.Model):
+    name = models.CharField(max_length=100)
+    link = models.CharField(max_length=100)
+
+
+class NewsItem(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.CharField(max_length=1000)
+    link = models.CharField(max_length=200)
+    # guid = models.CharField(max_length=200)
+    pub_date = models.DateTimeField()
+    # pub_date = models.CharField(max_length=100)
+    city = models.ForeignKey(City, related_name='items')
+
