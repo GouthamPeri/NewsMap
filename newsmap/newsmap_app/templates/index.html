@@ -106,10 +106,11 @@
             var bounds = new google.maps.LatLngBounds(); //for display bounds
 
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 5
+                zoom: 5,
+                center: new google.maps.LatLng(28.7041, 77.1025),
             });
             $.get('api/coords/', function(coords){
-                console.log(coords);
+                coords = JSON.parse(coords);
                 for(city in coords){
                     var marker = new google.maps.Marker({
                         position: coords[city],
@@ -118,7 +119,7 @@
                     });
                     markers.push(marker)
                 }
-            }
+            });
 
             google.maps.event.addListener(map,'zoom_changed',updateNewsItems);
             google.maps.event.addListener(map,'dragend',updateNewsItems);
@@ -126,7 +127,7 @@
         }
     </script>
     <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q&callback=initMap">
     </script>
 </body>
     <script>
