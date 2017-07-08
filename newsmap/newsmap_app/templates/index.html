@@ -78,6 +78,23 @@
             </div>
         </div>
     </div>
+    <!--var vizag = {lat: 17.6868, lng: 83.2185};-->
+            <!--var delhi = {lat: 28.7041 , lng: 77.1025};-->
+
+            <!--bounds.extend(vizag);-->
+            <!--bounds.extend(delhi);-->
+            <!---->
+    <!--markers.push(marker)-->
+
+            <!--var infowindow = new google.maps.InfoWindow({-->
+                <!--content: "<p>This is News from <b>Delhi!</b></p>"-->
+            <!--});-->
+    <!--marker.addListener('click', function() {-->
+                <!--infowindow.open(map, marker);-->
+
+            <!--});-->
+
+    <!--map.fitBounds(bounds);-->
 
 
     <script>
@@ -85,52 +102,27 @@
         marker2 = undefined
         markers = []
         map = undefined
-        function initMap() {
+        function initMap(callback) {
             var bounds = new google.maps.LatLngBounds(); //for display bounds
-
-            var vizag = {lat: 17.6868, lng: 83.2185};
-            var delhi = {lat: 28.7041 , lng: 77.1025};
-
-            bounds.extend(vizag);
-            bounds.extend(delhi);
 
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 5
             });
-            marker = new google.maps.Marker({
-                position: delhi,
-                map: map,
-                title: 'Delhi'
-            });
-            markers.push(marker)
+            $.get('api/coords/', function(coords){
+                console.log(coords);
+                for(city in coords){
+                    var marker = new google.maps.Marker({
+                        position: coords[city],
+                        map: map,
+                        title: city
+                    });
+                    markers.push(marker)
+                }
+            }
 
-            var infowindow = new google.maps.InfoWindow({
-                content: "<p>This is News from <b>Delhi!</b></p>"
-            });
-
-            marker.addListener('click', function() {
-                infowindow.open(map, marker);
-
-            });
-
-            marker2 = new google.maps.Marker({
-                position: vizag,
-                map: map,
-                title: 'Chennai'
-            });
-            markers.push(marker2)
-
-            var infowindow2 = new google.maps.InfoWindow({
-                content: "<p>This is News from <b>Vizag!</b></p>"
-            });
-
-            marker2.addListener('click', function() {
-                infowindow2.open(map, marker2);
-            });
-            console.log(marker)
             google.maps.event.addListener(map,'zoom_changed',updateNewsItems);
             google.maps.event.addListener(map,'dragend',updateNewsItems);
-            map.fitBounds(bounds);
+
         }
     </script>
     <script async defer

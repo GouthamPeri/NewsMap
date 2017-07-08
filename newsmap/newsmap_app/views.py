@@ -59,6 +59,11 @@ class RetrieveNewsItemsJSON(ListAPIView):
         return self.queryset.filter(city=city)
 
 
+def get_city_coords(request):
+    city_coords = {}
+    return JsonResponse(json.dumps(city_coords), safe=False)
+
+
 @csrf_exempt
 def get_news(request):
     if request.method == 'POST':
