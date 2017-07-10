@@ -84,8 +84,8 @@
         markers = []
         onScreenMarkers = []
         map = undefined
-        isIdle = false;
-        panned = false;
+        isIdle = true;
+        panned = true;
 
         function w3_open() {
             document.getElementById("mySidebar").style.display = "block";
@@ -111,6 +111,7 @@
                     });
                     markers.push(marker);
                 }
+
                 google.maps.event.addListener(map, 'zoom_changed', function(){
                     panned = true;
                     updateNewsItems();
@@ -124,6 +125,7 @@
                     updateNewsItems();
                 });
                 onScreenMarkers = captureMarkersOnScreen()
+                updateNewsItems()
             });
         }
     </script>
