@@ -1,31 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>NewsMap</title>
     <style>
-        #map {
-            height: 500px;
-            width: 100%;
-        }
-        img {
-            width: 100%;
-            height: auto;
-            margin-bottom: 16px;
-            border-radius: 4px;
-        }
-
-        .li {
-            min-width:100px;
-        }
-
-        #news_list {
-            height:400px;
-            overflow-y:scroll;
-        }
+        
     </style>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 
 
     <!-- Optional theme -->
@@ -63,46 +47,54 @@
             </div>
         </div>
     </nav>
-    <div class="container">
+    <div class="loader center-block" style="display:none"></div>
+    <!--<div class="container">-->
         <div class="row">
             <div class="col-sm-12 col-md-7 col-xs-12 col-lg-7">
-                <div id="map"></div>
+                <!--<div class="map_div" style="display:none">-->
+                    <div class="btn white glyphicon glyphicon-filter filter-btn" onclick="w3_open()"></div>
+                    <div class="sidebar animate-left" style="display:none;z-index:1" id="mySidebar">
+                        <ul class="list-group">
+                            <li class="list-group-item glyphicon glyphicon-remove text-right" onclick="w3_close()"></span>
+                            <li class="list-group-item">Hi</li>
+                            <li class="list-group-item">Hi</li>
+                        </ul>
+                    </div>
+                    <div id="map" class="np-margin-left" style="display:block">
+                    </div>
+                    
+
+                <!--</div>-->
             </div>
-            <div class="col-sm-6 col-md-5 col-xs-12 col-lg-5">
+            <div style="z-index:6;" class="col-sm-6 col-md-5 col-xs-12 col-lg-5">
                 <!--<div class="panel panel-default">-->
                     <!--<div class="panel-body">News</div>-->
                 <!--</div>-->
-                <ul id="news_list" class="list-group">
+                <ul id="news_list" class="np-margin-right list-group" style="display:block">
 
                 </ul>
             </div>
         </div>
-    </div>
-    <!--var vizag = {lat: 17.6868, lng: 83.2185};-->
-            <!--var delhi = {lat: 28.7041 , lng: 77.1025};-->
-
-            <!--bounds.extend(vizag);-->
-            <!--bounds.extend(delhi);-->
-            <!---->
-    <!--markers.push(marker)-->
-
-            <!--var infowindow = new google.maps.InfoWindow({-->
-                <!--content: "<p>This is News from <b>Delhi!</b></p>"-->
-            <!--});-->
-    <!--marker.addListener('click', function() {-->
-                <!--infowindow.open(map, marker);-->
-
-            <!--});-->
-
-    <!--map.fitBounds(bounds);-->
+    <!--</div>-->
 
 
     <script>
         marker = undefined
         marker2 = undefined
         markers = []
+        onScreenMarkers = []
         map = undefined
-        function initMap(callback) {
+        isIdle = false;
+        panned = false;
+
+        function w3_open() {
+            document.getElementById("mySidebar").style.display = "block";
+        }
+        function w3_close() {
+            document.getElementById("mySidebar").style.display = "none";
+        }
+
+        function initMap() {
             var bounds = new google.maps.LatLngBounds(); //for display bounds
 
             map = new google.maps.Map(document.getElementById('map'), {
@@ -117,44 +109,110 @@
                         map: map,
                         title: city
                     });
-                    markers.push(marker)
+                    markers.push(marker);
                 }
+                google.maps.event.addListener(map, 'zoom_changed', function(){
+                    panned = true;
+                    updateNewsItems();
+                });
+                google.maps.event.addListener(map, 'dragend', function(){
+                    panned = true;
+                    updateNewsItems();
+                });
+                google.maps.event.addListener(map, 'idle', function(){
+                    isIdle = true;
+                    updateNewsItems();
+                });
+                onScreenMarkers = captureMarkersOnScreen()
             });
-
-            google.maps.event.addListener(map,'zoom_changed',updateNewsItems);
-            google.maps.event.addListener(map,'dragend',updateNewsItems);
-
         }
     </script>
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q&callback=initMap">
-    </script>
+
 </body>
     <script>
-        function updateNewsItems(){
-            postData = {cities: new Array()}
-            $('#news_list').fadeIn(500, function(){
-                $(this).empty()
-                for(var i = markers.length, bounds = map.getBounds(); i--;) {
-                    if( bounds.contains(markers[i].getPosition()) ){
-                        postData['cities'].push(markers[i].title)
-                    }
-                }
-                $.post('api/news/', postData, function(data){
-                    data = JSON.parse(data)['items']
-                    $.tmpl(newsItemTemplate, data).appendTo('#news_list');
-                    $('img').removeAttr('hspace');
-                    $('img').removeAttr('style');
-                }, 'json');
-            });
+        page = 0;
+        function isIn(s)          { return x => s.has(x); }
 
+        function contains(s1, s2) { return [...s2] . every(isIn(s1)); }
+        
+        function eqSet(a, b)      { return a.size === b.size && contains(a, b); }
+
+        function updateNewsItems(){
+            if(panned && isIdle){
+                page = 0;
+                var postData = {cities: new Array()}
+                
+                var tempMarkers = new Set([...(captureMarkersOnScreen())])
+                var prevMarkers = new Set([...onScreenMarkers])
+                console.log(tempMarkers.size)
+                if(!tempMarkers.size){
+                    onScreenMarkers = []
+                    $('#news_list').fadeOut(200).html("<h4 class='text-center'><b>No News from this region!</b></h4>").fadeIn(300);
+                    isIdle = false;
+                    panned = false;
+                }
+                else if(eqSet(tempMarkers, prevMarkers) == false){
+                    $('#news_list').fadeOut(300).empty()
+                    onScreenMarkers = tempMarkers
+                    for(let marker of tempMarkers) {
+                        postData['cities'].push(marker.title)
+                    }
+                    $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
+                    isIdle = false;
+                    panned = false;
+                }
+            }
         }
+
+        function updateNewsListDOM(data) {
+            data = JSON.parse(data)['items']
+            var newsItemDom = $.tmpl(newsItemTemplate, data)
+            $(newsItemDom).find('img').removeAttr('hspace').removeAttr('style');
+            $(newsItemDom).appendTo('#news_list');
+            $('#news_list').fadeIn(500)
+        }
+
+        function captureMarkersOnScreen(){
+            var onScreenMarkers = []
+            for(var i = markers.length, bounds = map.getBounds(); i--;) {
+                if( bounds.contains(markers[i].getPosition()) ){
+                    onScreenMarkers.push(markers[i])
+                }
+            }
+            return onScreenMarkers
+        }
+
         $(document).ready(function(){
             newsItemTemplate = undefined
-            $.get('newsitems.html', function(template){
-                newsItemTemplate = template
-                $('#news_list').hide();
-            });
+            $('.loader').fadeIn(400, function(){
+                $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q')
+                    .done(function(script, textStatus){
+                        $.get('newsitems.html', function(template){
+                            newsItemTemplate = template
+                            $('#news_list').hide();
+                            $('.loader').hide();
+                            $('#news_list').empty()
+                            initMap();
+                            
+                        });
+                    })
+            })
+            $('#news_list').on('scroll', function() {
+                if($(this).scrollTop() + $(this).innerHeight()
+                    >= $(this)[0].scrollHeight) {
+                    var postData = {cities: new Array()}
+                    var markers = captureMarkersOnScreen()
+                    for(var i = 0; i < markers.length; i++) {
+                        postData['cities'].push(markers[i].title)
+                    }
+                    // $('#news_list').animate({
+                    //     scrollTop: $("#news_list").position().top
+                    // }, 1000);
+                    // START LOADING THE NEXT ITEMS
+                    page += 10
+                    $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
+                }
+            })
         });
 
     </script>

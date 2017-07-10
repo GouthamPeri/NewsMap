@@ -4,14 +4,16 @@ from __future__ import unicode_literals
 import json
 
 import time
+
+from dateutil import parser
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.response import Response
-
 from models import *
+import datetime
 from serializers import *
 import feedparser
 import pprint
@@ -39,9 +41,10 @@ def extract_feed(city_name):
         news_item['title'] = item['title']
         news_item['description'] = item['summary']
         news_item['link'] = item['link']
-        news_item['pub_date'] = time.strftime("%Y-%m-%d %X", item['published_parsed'])
+        news_item['pub_date'] = str(parser.parse(item['published']) + datetime.timedelta(hours=5, minutes=30))
         news_item['city'] = city
         NewsItem.objects.create(**news_item)
+
 
 
 def welcome(request):
@@ -83,7 +86,8 @@ def get_city_coords(request):
 
 
 @csrf_exempt
-def get_news(request):
+def get_news(request, page):
+    page = int(page)
     if request.method == 'POST':
         cities = request.POST.getlist('cities[]')
         data = {}
@@ -94,11 +98,14 @@ def get_news(request):
             else:
                 queryString += 'Q(city__name__startswith=' \
                                + repr(cities[len(cities) - 1]) \
-                               + ')).values("city__name", "pub_date", "title", "description", "link").order_by("-pub_date"))'
+                               + ')).values("city__name", "pub_date", "title", "description", "link")' \
+                                 '.order_by("-pub_date")[page:page+10])'
 
             print queryString
             data['items'] = eval(queryString)
             for i in range(len(data['items'])):
                 data['items'][i]['pub_date'] = data['items'][i]['pub_date'].strftime("%Y-%m-%d %H:%M:%S")
+
+    print data
     return JsonResponse(json.dumps(data), safe=False)
 

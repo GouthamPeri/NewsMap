@@ -8,6 +8,9 @@ class City(models.Model):
     name = models.CharField(max_length=100)
     link = models.CharField(max_length=100)
 
+    def __unicode__(self):
+        return self.name
+
 
 class NewsItem(models.Model):
     title = models.CharField(max_length=200)
@@ -18,3 +21,6 @@ class NewsItem(models.Model):
     # pub_date = models.CharField(max_length=100)
     city = models.ForeignKey(City, related_name='items')
 
+
+    def __unicode__(self):
+        return self.title[:10]
