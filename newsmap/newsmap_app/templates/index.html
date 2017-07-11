@@ -4,62 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <title>NewsMap</title>
-    <style>
-        
-    </style>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/materialize.min.css' %}"  media="screen,projection"/>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="{% static 'style.css' %}">
 
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script>
     <script type="text/javascript" src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" ></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous" ></script>
+    <script type="text/javascript" src="{% static 'js/materialize.min.js' %}"></script>
 
 
 
 </head>
 <body>
-    <nav class="navbar navbar-inverse">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">NewsMap</a>
-            </div>
-            <div class="collapse navbar-collapse" id="myNavbar">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="#">Disclaimer</a></li> <!-- Talk about where the news content is coming from-->
-                <li><a href="#">About us</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
+    
+     <div class="navbar-fixed">
+        <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">NewsMap</a>
+            <ul class="right hide-on-med-and-down">
                 <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
                 <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
             </ul>
-            </div>
         </div>
-    </nav>
+        </nav>
+    </div>
+    <div class="parallax-container">
+      <div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/></div>
+    </div>
+
+    
     <div class="loader center-block" style="display:none"></div>
     <!--<div class="container">-->
         <div class="row">
             <div class="col-sm-12 col-md-7 col-xs-12 col-lg-7">
                 <!--<div class="map_div" style="display:none">-->
-                    <div class="btn white glyphicon glyphicon-filter filter-btn" onclick="w3_open()"></div>
-                    <div class="sidebar animate-left" style="display:none;z-index:1" id="mySidebar">
-                        <ul class="list-group">
-                            <li class="list-group-item glyphicon glyphicon-remove text-right" onclick="w3_close()"></li>
-                            <li class="list-group-item">Published date</li>
-                            <li class="list-group-item">City</li>
-                        </ul>
-                    </div>
+                    <!--<div class="btn white glyphicon glyphicon-filter filter-btn" onclick="w3_open()"></div>-->
+                    <!--<div class="sidebar animate-left" style="display:none;z-index:1" id="mySidebar">-->
+                        <!--<ul class="list-group">-->
+                            <!--<li class="list-group-item glyphicon glyphicon-remove text-right" onclick="w3_close()"></li>-->
+                            <!--<li class="list-group-item">Published date</li>-->
+                            <!--<li class="list-group-item">City</li>-->
+                        <!--</ul>-->
+                    <!--</div>-->
                     <div id="map" class="np-margin-left" style="display:block">
                     </div>
                     
@@ -185,6 +182,7 @@
         }
 
         $(document).ready(function(){
+            $('.parallax').parallax();
             newsItemTemplate = undefined
             $('.loader').fadeIn(400, function(){
                 $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q')
