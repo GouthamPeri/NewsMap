@@ -28,9 +28,9 @@
 </head>
 <body>
     
-     <div class="navbar-fixed">
+     <div class="navbar-fixed nav-opacity" >
         <nav>
-        <div class="nav-wrapper">
+        <div class="nav-wrapper" style="background-color: #2A0568!important;">
             <a href="#" class="brand-logo">NewsMap</a>
             <ul class="right hide-on-med-and-down">
                 <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
@@ -39,15 +39,17 @@
         </div>
         </nav>
     </div>
+     <h5 id="header">Get the city news from the map <br> by just placing the marker of the city in scope.</h5><br>
     <div class="parallax-container">
-      <div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/></div>
+      <div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/>
+      </div>
     </div>
 
     
     <div class="loader center-block" style="display:none"></div>
     <!--<div class="container">-->
         <div class="row">
-            <div class="col-sm-12 col-md-7 col-xs-12 col-lg-7">
+            <div class="col s6">
                 <!--<div class="map_div" style="display:none">-->
                     <!--<div class="btn white glyphicon glyphicon-filter filter-btn" onclick="w3_open()"></div>-->
                     <!--<div class="sidebar animate-left" style="display:none;z-index:1" id="mySidebar">-->
@@ -63,7 +65,7 @@
 
                 <!--</div>-->
             </div>
-            <div style="z-index:6;" class="col-sm-6 col-md-5 col-xs-12 col-lg-5">
+            <div style="z-index:6;" class="col s6">
                 <!--<div class="panel panel-default">-->
                     <!--<div class="panel-body">News</div>-->
                 <!--</div>-->
@@ -212,7 +214,7 @@
                     page += 10
                     $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
                 }
-            })
+            });
         });
 
     </script>

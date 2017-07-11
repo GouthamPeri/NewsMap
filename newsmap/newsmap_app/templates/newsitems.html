@@ -1,13 +1,31 @@
-<li class="list-group-item">
-    {% verbatim %}
-    <p><h4><b>${title}</b></h4></p>
-    <p><h5>${city__name}:</h5></p>
-    <p>{{html String(description).replace("'", "")}}</p>
 
-        <div class="row">
-            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8"><label>Published on</label> ${pub_date}</div>
-            <div class="col-xs-8 col-sm-8 col-md-4 col-lg-4"><a href="${link}" style="text-align:right"><b>Read more</b></a></div>
+
+<div class="wrapper">
+    {% verbatim %}
+    <div class="card radius shadowDepth1">
+        <div class="card__content card__padding">
+            <div class="card__share">
+                <div class="card__social">
+                    <a class="share-icon facebook" href="#"><span class="fa fa-facebook"></span></a>
+                    <a class="share-icon twitter" href="#"><span class="fa fa-twitter"></span></a>
+                    <a class="share-icon googleplus" href="#"><span class="fa fa-google-plus"></span></a>
+                </div>
+
+                <a id="share" class="share-toggle share-icon" href="#"></a>
+            </div>
+            <article class="card__article">
+                <h2><a href="${link}" target="_blank">${title}</a></h2>
+
+                <p>{{html String(description).replace("'", "")}}</p>
+            </article>
         </div>
 
+        <div class="card__meta" style="margin-bottom : 32px;>
+            <center>
+                <a href="#" >${city__name}</a>
+                <time>${pub_date}</time>
+                </center>
+        </div>
+    </div>
     {% endverbatim %}
-</li>
+</div>
