@@ -16,6 +16,7 @@ from models import *
 import datetime
 from serializers import *
 import feedparser
+from bs4 import BeautifulSoup
 import pprint
 
 city_urls = {'Mumbai' : -2128838597,'Delhi' : -2128839596, 'Banglore' : -2128833038, 'Hyderabad' : -2128816011, 'Chennai' : 2950623,
@@ -39,8 +40,16 @@ def extract_feed(city_name):
     for item in feed['items']:
         news_item = {}
         news_item['title'] = item['title']
-        news_item['description'] = item['summary']
+        summary = item['summary']
+        soup = BeautifulSoup(summary, "html5lib")
+        if soup.img:
+            news_item['img'] = soup.img.attrs['src']
+            soup.a.replaceWith('')
+        else:
+            news_item['img'] = None
         news_item['link'] = item['link']
+
+        news_item['description'] = soup.getText()
         news_item['pub_date'] = str(parser.parse(item['published']) + datetime.timedelta(hours=5, minutes=30))
         news_item['city'] = city
         NewsItem.objects.create(**news_item)
@@ -49,8 +58,9 @@ def extract_feed(city_name):
 
 def welcome(request):
     print City.objects.all().delete()
-    for city in city_urls.keys():
-        extract_feed(city)
+    # for city in city_urls.keys():
+    #     extract_feed(city)
+    extract_feed('Mumbai')
     return HttpResponse("Welcome to NewsMap, Sync finished")
 
 
@@ -98,7 +108,7 @@ def get_news(request, page):
             else:
                 queryString += 'Q(city__name__startswith=' \
                                + repr(cities[len(cities) - 1]) \
-                               + ')).values("city__name", "pub_date", "title", "description", "link")' \
+                               + ')).values("city__name", "pub_date", "title", "description", "link", "img")' \
                                  '.order_by("-pub_date")[page:page+10])'
 
             print queryString
@@ -106,6 +116,7 @@ def get_news(request, page):
             for i in range(len(data['items'])):
                 data['items'][i]['pub_date'] = data['items'][i]['pub_date'].strftime("%Y-%m-%d %H:%M:%S")
 
-    print data
+    for ele in  data['items']:
+        print ele
     return JsonResponse(json.dumps(data), safe=False)
 

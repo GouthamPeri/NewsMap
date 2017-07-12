@@ -19,9 +19,11 @@
     
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script>
+
     <script type="text/javascript" src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" ></script>
     <!-- Latest compiled and minified JavaScript -->
     <script type="text/javascript" src="{% static 'js/materialize.min.js' %}"></script>
+    <script src="{% static 'js/js.js' %}"></script>
 
 
 
@@ -39,184 +41,23 @@
         </div>
         </nav>
     </div>
-     <h5 id="header">Get the city news from the map <br> by just placing the marker of the city in scope.</h5><br>
+        <h3 id="header">News for the busy people<br></h3><br>
     <div class="parallax-container">
-      <div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/>
-      </div>
+        <div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/>
+        </div>
     </div>
 
     
     <div class="loader center-block" style="display:none"></div>
-    <!--<div class="container">-->
-        <div class="row">
-            <div class="col s6">
-                <!--<div class="map_div" style="display:none">-->
-                    <!--<div class="btn white glyphicon glyphicon-filter filter-btn" onclick="w3_open()"></div>-->
-                    <!--<div class="sidebar animate-left" style="display:none;z-index:1" id="mySidebar">-->
-                        <!--<ul class="list-group">-->
-                            <!--<li class="list-group-item glyphicon glyphicon-remove text-right" onclick="w3_close()"></li>-->
-                            <!--<li class="list-group-item">Published date</li>-->
-                            <!--<li class="list-group-item">City</li>-->
-                        <!--</ul>-->
-                    <!--</div>-->
-                    <div id="map" class="np-margin-left" style="display:block">
-                    </div>
-                    
-
-                <!--</div>-->
-            </div>
-            <div style="z-index:6;" class="col s6">
-                <!--<div class="panel panel-default">-->
-                    <!--<div class="panel-body">News</div>-->
-                <!--</div>-->
-                <ul id="news_list" class="np-margin-right list-group" style="display:block">
-
-                </ul>
+    <div class="row">
+        <div class="col s6">
+            <div id="map" class="np-margin-left" style="display:block">
             </div>
         </div>
-    <!--</div>-->
-
-
-    <script>
-        marker = undefined
-        marker2 = undefined
-        markers = []
-        onScreenMarkers = []
-        map = undefined
-        isIdle = true;
-        panned = true;
-
-        function w3_open() {
-            document.getElementById("mySidebar").style.display = "block";
-        }
-        function w3_close() {
-            document.getElementById("mySidebar").style.display = "none";
-        }
-
-        function initMap() {
-            var bounds = new google.maps.LatLngBounds(); //for display bounds
-
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 5,
-                center: new google.maps.LatLng(28.7041, 77.1025),
-            });
-            $.get('api/coords/', function(coords){
-                coords = JSON.parse(coords);
-                for(city in coords){
-                    var marker = new google.maps.Marker({
-                        position: coords[city],
-                        map: map,
-                        title: city
-                    });
-                    markers.push(marker);
-                }
-
-                google.maps.event.addListener(map, 'zoom_changed', function(){
-                    panned = true;
-                    updateNewsItems();
-                });
-                google.maps.event.addListener(map, 'dragend', function(){
-                    panned = true;
-                    updateNewsItems();
-                });
-                google.maps.event.addListener(map, 'idle', function(){
-                    isIdle = true;
-                    updateNewsItems();
-                });
-                onScreenMarkers = captureMarkersOnScreen()
-                updateNewsItems()
-            });
-        }
-    </script>
-
+        <div style="z-index:6;" class="col s6">
+            <ul id="news_list" class="np-margin-right list-group" style="display:block">
+            </ul>
+        </div>
+    </div>
 </body>
-    <script>
-        page = 0;
-        function isIn(s)          { return x => s.has(x); }
-
-        function contains(s1, s2) { return [...s2] . every(isIn(s1)); }
-        
-        function eqSet(a, b)      { return a.size === b.size && contains(a, b); }
-
-        function updateNewsItems(){
-            if(panned && isIdle){
-                page = 0;
-                var postData = {cities: new Array()}
-                
-                var tempMarkers = new Set([...(captureMarkersOnScreen())])
-                var prevMarkers = new Set([...onScreenMarkers])
-                console.log(tempMarkers.size)
-                if(!tempMarkers.size){
-                    onScreenMarkers = []
-                    $('#news_list').fadeOut(200).html("<h4 class='text-center'><b>No News from this region!</b></h4>").fadeIn(300);
-                    isIdle = false;
-                    panned = false;
-                }
-                else if(eqSet(tempMarkers, prevMarkers) == false){
-                    $('#news_list').fadeOut(300).empty()
-                    onScreenMarkers = tempMarkers
-                    for(let marker of tempMarkers) {
-                        postData['cities'].push(marker.title)
-                    }
-                    $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
-                    isIdle = false;
-                    panned = false;
-                }
-            }
-        }
-
-        function updateNewsListDOM(data) {
-            data = JSON.parse(data)['items']
-            var newsItemDom = $.tmpl(newsItemTemplate, data)
-            $(newsItemDom).find('img').removeAttr('hspace').removeAttr('style');
-            $(newsItemDom).appendTo('#news_list');
-            $('#news_list').fadeIn(500)
-        }
-
-        function captureMarkersOnScreen(){
-            var onScreenMarkers = []
-            for(var i = markers.length, bounds = map.getBounds(); i--;) {
-                if( bounds.contains(markers[i].getPosition()) ){
-                    onScreenMarkers.push(markers[i])
-                }
-            }
-            return onScreenMarkers
-        }
-
-        $(document).ready(function(){
-            $('.parallax').parallax();
-            newsItemTemplate = undefined
-            $('.loader').fadeIn(400, function(){
-                $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q')
-                    .done(function(script, textStatus){
-                        $.get('newsitems.html', function(template){
-                            newsItemTemplate = template
-                            $('#news_list').hide();
-                            $('.loader').hide();
-                            $('#news_list').empty()
-                            initMap();
-                            
-                        });
-                    })
-            })
-            $('#news_list').on('scroll', function() {
-                if($(this).scrollTop() + $(this).innerHeight()
-                    >= $(this)[0].scrollHeight) {
-                    var postData = {cities: new Array()}
-                    var markers = captureMarkersOnScreen()
-                    for(var i = 0; i < markers.length; i++) {
-                        postData['cities'].push(markers[i].title)
-                    }
-                    // $('#news_list').animate({
-                    //     scrollTop: $("#news_list").position().top
-                    // }, 1000);
-                    // START LOADING THE NEXT ITEMS
-                    page += 10
-                    $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
-                }
-            });
-        });
-
-    </script>
-
 </html>

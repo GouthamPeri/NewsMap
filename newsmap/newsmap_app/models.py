@@ -16,6 +16,7 @@ class NewsItem(models.Model):
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
     link = models.CharField(max_length=200)
+    img = models.CharField(max_length=200, null=True)
     # guid = models.CharField(max_length=200)
     pub_date = models.DateTimeField()
     # pub_date = models.CharField(max_length=100)
