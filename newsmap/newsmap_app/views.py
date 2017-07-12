@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import json
 
-import time
 
 from dateutil import parser
 from django.db.models import Q
@@ -11,13 +10,11 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.generics import RetrieveAPIView, ListAPIView
-from rest_framework.response import Response
 from models import *
 import datetime
 from serializers import *
 import feedparser
 from bs4 import BeautifulSoup
-import pprint
 
 city_urls = {'Mumbai' : -2128838597,'Delhi' : -2128839596, 'Banglore' : -2128833038, 'Hyderabad' : -2128816011, 'Chennai' : 2950623,
     'Ahemdabad' : -2128821153, 'Allahabad' : 3947060, 'Bhubaneswar' : 4118235, 'Coimbatore' :7503091, 'Gurgaon' : 6547154,
@@ -57,11 +54,10 @@ def extract_feed(city_name):
 
 
 def welcome(request):
-    print City.objects.all().delete()
-    # for city in city_urls.keys():
-    #     extract_feed(city)
-    extract_feed('Mumbai')
-    return HttpResponse("Welcome to NewsMap, Sync finished")
+    City.objects.all().delete()
+    for city in city_urls.keys():
+        extract_feed(city)
+    return HttpResponse("Welcome to NewsMap, Finished Syncing News")
 
 
 class RetrieveNewsItemsJSON(ListAPIView):
@@ -111,12 +107,8 @@ def get_news(request, page):
                                + ')).values("city__name", "pub_date", "title", "description", "link", "img")' \
                                  '.order_by("-pub_date")[page:page+10])'
 
-            print queryString
             data['items'] = eval(queryString)
             for i in range(len(data['items'])):
                 data['items'][i]['pub_date'] = data['items'][i]['pub_date'].strftime("%Y-%m-%d %H:%M:%S")
-
-    for ele in  data['items']:
-        print ele
     return JsonResponse(json.dumps(data), safe=False)
 
