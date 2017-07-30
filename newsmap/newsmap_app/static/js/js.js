@@ -6,7 +6,7 @@ map = undefined
 isIdle = true;
 panned = true;
 page = 0
-mode = 'marker'
+mode = 'city'
 
 
 $(document).ready(function(){
@@ -42,15 +42,15 @@ $(document).ready(function(){
     });
 
     $('.mode-toggle').on('click', function(){
-        if(mode == 'marker'){
+        if(mode == 'city'){
             hideAllMarkers()
-            mode = 'scroll'
-            $('.mode-toggle').html('Switch to Marker View')
+            mode = 'dynamic'
+            $('.mode-toggle').html('Switch to City View')
         }
         else{
             showAllMarkers()
-            mode = 'marker'
-            $('.mode-toggle').html('Switch to Scroll View')
+            mode = 'city'
+            $('.mode-toggle').html('Switch to Dynamic View')
         }
     })
     
@@ -119,7 +119,7 @@ function contains(s1, s2) { return [...s2] . every(isIn(s1)); }
 function eqSet(a, b)      { return a.size === b.size && contains(a, b); }
 
 function updateNewsItems(){
-    if(panned && isIdle && mode == 'scroll'){
+    if(panned && isIdle && mode == 'dynamic'){
         isIdle = false;
         panned = false;
         console.log("Updating news..");
