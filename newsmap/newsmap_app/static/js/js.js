@@ -10,7 +10,6 @@ mode = 'marker'
 
 
 $(document).ready(function(){
-    $('.parallax').parallax();
     newsItemTemplate = undefined
     $('.loader').fadeIn(400, function(){
         $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCis1M1LYaOmuDEn3Ec5LKxd9tAHpgH41Q')
@@ -54,6 +53,7 @@ $(document).ready(function(){
             $('.mode-toggle').html('Switch to Scroll View')
         }
     })
+    
 });
 
 function w3_open() {
@@ -73,13 +73,25 @@ function initMap() {
     $.get('api/coords/', function(coords){
         coords = JSON.parse(coords);
         for(city in coords){
-            var marker = new google.maps.Marker({
+            console.log(city)
+            marker = new google.maps.Marker({
                 position: coords[city],
                 map: map,
                 title: city
             });
             markers.push(marker);
+            
         }
+        $.each(markers, function(i, v){
+            v.addListener('click', function(){
+                var postData = {cities: new Array()}
+                $('#news_list').fadeOut(200, function(){
+                    $(this).empty()
+                    postData['cities'].push(v.title)
+                    $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
+                })
+            });
+        })
 
         google.maps.event.addListener(map, 'zoom_changed', function(){
             panned = true;
@@ -93,9 +105,11 @@ function initMap() {
             isIdle = true;
             updateNewsItems();
         });
-        onScreenMarkers = captureMarkersOnScreen()
         updateNewsItems()
+        
     });
+    
+    
 }
 
 function isIn(s)          { return x => s.has(x); }
@@ -105,30 +119,35 @@ function contains(s1, s2) { return [...s2] . every(isIn(s1)); }
 function eqSet(a, b)      { return a.size === b.size && contains(a, b); }
 
 function updateNewsItems(){
-    if(panned && isIdle){
+    if(panned && isIdle && mode == 'scroll'){
+        isIdle = false;
+        panned = false;
+        console.log("Updating news..");
         page = 0;
         var postData = {cities: new Array()}
         
         var tempMarkers = new Set([...(captureMarkersOnScreen())])
         var prevMarkers = new Set([...onScreenMarkers])
-        console.log(tempMarkers.size)
         if(!tempMarkers.size){
             onScreenMarkers = []
-            $('#news_list').fadeOut(200).html("<h4 class='text-center'><b>No News from this region!</b></h4>").fadeIn(300);
-            isIdle = false;
-            panned = false;
+            $('#news_list').fadeOut(200).html("<h4 class='white-text text-center'><b>No News from this region!</b></h4>").fadeIn(300);
         }
         else if(eqSet(tempMarkers, prevMarkers) == false){
-            $('#news_list').fadeOut(300).empty()
-            onScreenMarkers = tempMarkers
-            for(let marker of tempMarkers) {
-                postData['cities'].push(marker.title)
-            }
-            $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
-            isIdle = false;
-            panned = false;
+            $('#news_list').fadeOut(200, function(){
+                $(this).empty()
+                onScreenMarkers = tempMarkers
+                for(let marker of tempMarkers) {
+                    postData['cities'].push(marker.title)
+                }
+                $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
+            })
+            
         }
     }
+}
+
+function updateNewsItemsByCity(obj){
+    
 }
 
 function updateNewsListDOM(data) {
@@ -139,6 +158,7 @@ function updateNewsListDOM(data) {
 }
 
 function captureMarkersOnScreen(){
+
     var onScreenMarkers = []
     for(var i = markers.length, bounds = map.getBounds(); i--;) {
         if( bounds.contains(markers[i].getPosition()) ){
@@ -152,10 +172,16 @@ function hideAllMarkers(){
     for(var i = 0; i < markers.length; i++) {
         markers[i].setVisible(false);    
     }
+    $('#tip').attr("data-tooltip", "News based on the city marker selected");
+    $('#tip').tooltip();
+    Materialize.toast('Keep dragging and zooming!', 2000)
 }
 
 function showAllMarkers(){
     for(var i = 0; i < markers.length; i++) {
         markers[i].setVisible(true);    
     }
+    $('#tip').attr("data-tooltip", "Dynamic news updates based on map location");
+    $('#tip').tooltip();
+    Materialize.toast('Focus on a single city', 2000)
 }
