@@ -6,6 +6,7 @@ map = undefined
 isIdle = true;
 panned = true;
 page = 0
+mode = 'marker'
 
 
 $(document).ready(function(){
@@ -40,6 +41,19 @@ $(document).ready(function(){
             $.post('api/news/' + page + '/', postData, updateNewsListDOM, 'json');    
         }
     });
+
+    $('.mode-toggle').on('click', function(){
+        if(mode == 'marker'){
+            hideAllMarkers()
+            mode = 'scroll'
+            $('.mode-toggle').html('Switch to Marker View')
+        }
+        else{
+            showAllMarkers()
+            mode = 'marker'
+            $('.mode-toggle').html('Switch to Scroll View')
+        }
+    })
 });
 
 function w3_open() {
@@ -134,4 +148,14 @@ function captureMarkersOnScreen(){
     return onScreenMarkers
 }
 
+function hideAllMarkers(){
+    for(var i = 0; i < markers.length; i++) {
+        markers[i].setVisible(false);    
+    }
+}
 
+function showAllMarkers(){
+    for(var i = 0; i < markers.length; i++) {
+        markers[i].setVisible(true);    
+    }
+}

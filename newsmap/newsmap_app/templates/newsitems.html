@@ -1,14 +1,13 @@
-
-
 <div class="wrapper">
     {% verbatim %}
     <div class="card radius shadowDepth1">
-        
+        {{if img}}
         <div class="card__image border-tlr-radius">
             <img src="${img}" />
         </div>
+        {{/if}}
         <div class="card__content card__padding">
-            <div class="card__share">
+            <!--<div class="card__share">
                 <div class="card__social">
                     <a class="share-icon facebook" href="#"><span class="fa fa-facebook"></span></a>
                     <a class="share-icon twitter" href="#"><span class="fa fa-twitter"></span></a>
@@ -16,7 +15,7 @@
                 </div>
 
                 <a id="share" class="share-toggle share-icon" href="#"></a>
-            </div>
+            </div>-->
             <article class="card__article">
                 <h3><a href="${link}" target="_blank">${title}</a></h3>
                 <p>{{html String(description).replace("'", "")}}</p>

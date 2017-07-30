@@ -38,7 +38,7 @@ def extract_feed(city_name):
         news_item = {}
         news_item['title'] = item['title']
         summary = item['summary']
-        soup = BeautifulSoup(summary)
+        soup = BeautifulSoup(summary, "html5lib")
         if soup.img:
             news_item['img'] = soup.img.attrs['src']
             soup.a.replaceWith('')

@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
     <link type="text/css" rel="stylesheet" href="{% static 'css/materialize.min.css' %}"  media="screen,projection"/>
-
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="{% static 'style.css' %}">
@@ -21,7 +21,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script>
 
     <script type="text/javascript" src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" ></script>
-    <!-- Latest compiled and minified JavaScript -->
+
     <script type="text/javascript" src="{% static 'js/materialize.min.js' %}"></script>
     <script src="{% static 'js/js.js' %}"></script>
 
@@ -33,7 +33,7 @@
      <div class="navbar-fixed nav-opacity" >
         <nav>
         <div class="nav-wrapper" style="background-color: #2A0568!important;">
-            <a href="#" class="brand-logo">NewsMap</a>
+            <a href="#" class="brand-logo" style="padding-left:24px">NewsMap - News for the busy people!</a>
             <ul class="right hide-on-med-and-down">
                 <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
                 <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
@@ -41,23 +41,32 @@
         </div>
         </nav>
     </div>
-        <h3 id="header">News for the busy people<br></h3><br>
-    <div class="parallax-container">
-        <div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/>
-        </div>
-    </div>
+        <!--<h3 id="header">News for the busy people<br></h3><br>-->
+    <!--<div class="parallax-container">-->
+        <!--<div class="opacity parallax"><img src="{% static 'images/news.jpg' %}"/>-->
+        <!--</div>-->
+    <!--</div>-->
 
     
     <div class="loader center-block" style="display:none"></div>
-    <div class="row">
-        <div class="col s6">
-            <div id="map" class="np-margin-left" style="display:block">
+    <div>
+        <div id="map" style="display:block">
+        </div>
+        <div class="row">
+            <div class="col s8">
+            </div>
+            <div class="col s4">
+                <div style="position:absolute; right:0; width: inherit; height: 100%; background:rgba(0, 0, 0, 0.3); text-align: center">
+                    <button style=""
+                        class="waves-effect waves-light btn mode-toggle">
+                        Switch to Scroll View
+                    </button>
+                    <ul id="news_list" class="margin-right list-group" style="display:block">
+                    </ul>
+                </div>
             </div>
         </div>
-        <div style="z-index:6;" class="col s6">
-            <ul id="news_list" class="np-margin-right list-group" style="display:block">
-            </ul>
-        </div>
     </div>
+    
 </body>
 </html>
